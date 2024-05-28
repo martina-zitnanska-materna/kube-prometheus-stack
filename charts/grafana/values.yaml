@@ -2,7 +2,7 @@ rbac:
   create: true
   ## Use an existing ClusterRole/Role (depending on rbac.namespaced false/true)
   # useExistingRole: name-of-some-(cluster)role
-  pspEnabled: true
+  pspEnabled: false
   pspUseAppArmor: true
   namespaced: false
   extraRoleRules: []
@@ -232,8 +232,8 @@ extraContainerVolumes: []
 ##
 persistence:
   type: pvc
-  enabled: false
-  # storageClassName: default
+  enabled: true
+#storageClassName: default
   accessModes:
     - ReadWriteOnce
   size: 10Gi
@@ -385,22 +385,22 @@ plugins: []
 ## ref: http://docs.grafana.org/administration/provisioning/#datasources
 ##
 datasources: {}
-#  datasources.yaml:
-#    apiVersion: 1
-#    datasources:
-#    - name: Prometheus
-#      type: prometheus
-#      url: http://prometheus-prometheus-server
-#      access: proxy
-#      isDefault: true
-#    - name: CloudWatch
-#        type: cloudwatch
-#        access: proxy
-#        uid: cloudwatch
-#        editable: false
-#        jsonData:
-#          authType: credentials
-#          defaultRegion: us-east-1
+datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-prometheus-server
+      access: proxy
+      isDefault: true
+    - name: CloudWatch
+      type: cloudwatch
+      access: proxy
+      uid: cloudwatch
+      editable: false
+      jsonData:
+          authType: credentials
+          defaultRegion: us-east-1
 
 ## Configure notifiers
 ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -425,18 +425,19 @@ notifiers: {}
 ##
 ## `path` must be /var/lib/grafana/dashboards/<provider_name>
 ##
-dashboardProviders: {}
-#  dashboardproviders.yaml:
-#    apiVersion: 1
-#    providers:
-#    - name: 'default'
-#      orgId: 1
-#      folder: ''
-#      type: file
-#      disableDeletion: false
-#      editable: true
-#      options:
-#        path: /var/lib/grafana/dashboards/default
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
 
 ## Configure grafana dashboard to import
 ## NOTE: To use dashboards you must also enable/configure dashboardProviders
@@ -444,17 +445,27 @@ dashboardProviders: {}
 ##
 ## dashboards per provider, use provider name as key.
 ##
-dashboards: {}
-  # default:
-  #   some-dashboard:
-  #     json: |
-  #       $RAW_JSON
-  #   custom-dashboard:
-  #     file: dashboards/custom-dashboard.json
-  #   prometheus-stats:
-  #     gnetId: 2
-  #     revision: 2
-  #     datasource: Prometheus
+dashboards:
+   default:
+     imported-dashboard-name:
+       gnetID: 7362
+       version: 5
+       datasource: Prometheus
+       mariadby:
+         json: |
+           {
+             "__inputs": [
+               {
+                 "name": "DS_PROMETHEUS",
+                 "label": "prometheus",
+                 "description": "",
+                 "type": "datasource",
+     custom-dashboard:
+       url: https://grafana.com/api/dashboards/15661/revisions/1/download
+     prometheus-stats:
+       gnetId: 2
+       revision: 2
+       datasource: Prometheus
   #   local-dashboard:
   #     url: https://example.com/repository/test.json
   #   local-dashboard-base64:
@@ -563,7 +574,7 @@ sidecar:
   # skipTlsVerify: true
   enableUniqueFilenames: false
   dashboards:
-    enabled: false
+    enabled: true
     SCProvider: true
     # label that the configmaps with dashboards are marked with
     label: grafana_dashboard
@@ -595,7 +606,7 @@ sidecar:
       # allow Grafana to replicate dashboard structure from filesystem
       foldersFromFilesStructure: false
   datasources:
-    enabled: false
+    enabled: true
     # label that the configmaps with datasources are marked with
     label: grafana_datasource
     # If specified, the sidecar will search for datasource config-maps inside this namespace.
